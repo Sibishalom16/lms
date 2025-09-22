@@ -17,8 +17,7 @@ A full-stack Learning Management System built using Next.js, MongoDB, Tailwind C
 
 ## Setup Instructions
 ```bash
-https://github.com/Sibishalom16/lms-project.git
-
+https://github.com/Sibishalom16/lms.git
 
 
 
