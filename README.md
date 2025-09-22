@@ -1,25 +1,30 @@
-# LMS Project
+# UI Component Plan
 
-A full-stack Learning Management System built using Next.js, MongoDB, Tailwind CSS, and NextAuth.js.
+## Reusable Components
+- Button
+- Input
+- Card
 
-## Features
-- Authentication with NextAuth.js
-- Student and Admin dashboards
-- Course creation, enrollment, and progress tracking
-- Responsive UI with reusable components
+## Layout Components
+- Navbar
+- Footer
+- DashboardLayout
 
-## Tech Stack
-- **Framework:** Next.js (App Router)
-- **Database:** MongoDB via Mongoose
-- **Authentication:** NextAuth.js
-- **Styling:** Tailwind CSS
-- **Language:** JavaScript
+## Page-Level Components
+- HomePage
+- LoginPage
+- SignupPage
+- DashboardPage
 
-## Setup Instructions
-```bash
-https://github.com/Sibishalom16/lms-project.git
+## Folder Structure
+src/
+ ├── components/
+ ├── layouts/
+ ├── pages/
+ ├── page.js
+ └── globals.css
 
-
-
-
-
+## Responsiveness
+- Navbar collapses into hamburger menu on mobile
+- DashboardLayout switches to vertical scroll on small screens
+- Buttons & Inputs scale with screen size
