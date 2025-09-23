@@ -1,10 +1,45 @@
+"use client"
+import { useState } from "react";
 import Button from "../../components/global/button";
-
-
+import InputField from "../../components/global/input-field";
 
 export default function LoginPage() {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ email: "", password: "" });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    let hasError = false;
+    const newErrors = { email: "", password: "" };
+
+    if (!form.email) {
+      newErrors.email = "Email is required";
+      hasError = true;
+    }
+
+    if (!form.password) {
+      newErrors.password = "Password is required";
+      hasError = true;
+    }
+
+    setErrors(newErrors);
+
+    if (!hasError) {
+      // For now, just log the form data
+      console.log("Login submitted:", form);
+      alert("Login successful (mock)");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400">
+      
+      {/* Navbar */}
       <nav className="flex justify-end items-center p-4 text-white">
         <ul className="flex gap-6 text-lg">
           <li><a href="/" className="hover:scale-110 transition-transform">Home</a></li>
@@ -13,14 +48,33 @@ export default function LoginPage() {
         </ul>
       </nav>
 
-      <div className="flex flex-1 justify-center items-center">
-        <form className="bg-white p-10 rounded-2xl shadow-2xl w-80 flex flex-col gap-4">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
-          <label className="font-semibold text-gray-700">Email</label>
-          <input type="email" placeholder="Enter your email" className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-1 shadow-sm transition"/>
-          <label className="font-semibold text-gray-700">Password</label>
-          <input type="password" placeholder="Enter your password" className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-1 shadow-sm transition"/>
-          <Button type="submit" className="mt-4">Login</Button>
+      {/* Login Form */}
+      <div className="flex flex-1 justify-center items-center px-4">
+        <form onSubmit={handleSubmit} className="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col gap-6">
+          <h2 className="text-3xl font-bold text-center text-gray-800">Login</h2>
+
+          <InputField
+            label="Email"
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={handleChange}
+            error={errors.email}
+          />
+
+          <InputField
+            label="Password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={handleChange}
+            error={errors.password}
+          />
+
+          <Button type="submit" className="mt-2">Login</Button>
+
         </form>
       </div>
     </div>
