@@ -1,4 +1,6 @@
-import Button from "../../components/Button";
+import Button from "../../components/global/button";
+
+
 
 export default function LoginPage() {
   return (

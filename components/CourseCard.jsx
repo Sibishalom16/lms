@@ -1,5 +1,4 @@
-import Button from "./Button";
-
+import Button from "./global/button";
 export default function CourseCard({ title, description }) {
   return (
     <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
