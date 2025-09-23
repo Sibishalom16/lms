@@ -32,7 +32,7 @@ export default function LoginPage() {
     if (!hasError) {
       // For now, just log the form data
       console.log("Login submitted:", form);
-      alert("Login successful (mock)");
+      alert("Login successful 😊");
     }
   };
 
