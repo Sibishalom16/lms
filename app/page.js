@@ -10,7 +10,7 @@ export default function HomePage() {
       <nav className="flex justify-end items-center p-4">
         <ul className="flex gap-6">
           <li><a href="/" className="hover:text-yellow-300 transition">Home</a></li>
-          <li><a href="/dashboard" className="hover:text-yellow-300 transition">Dashboard</a></li>
+          <li><a href="/admin-dashboard" className="hover:text-yellow-300 transition">Dashboard</a></li>
           <li><a href="/login" className="hover:text-yellow-300 transition">Login</a></li>
         </ul>
       </nav>
