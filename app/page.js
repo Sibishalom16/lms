@@ -1,5 +1,7 @@
-import Button from "../components/Button";
-import CourseCard from "../components/CourseCard";
+import Button from "../components/global/button";
+
+import CourseCard from "../components/CourseCard"; 
+
 
 export default function HomePage() {
   return (
