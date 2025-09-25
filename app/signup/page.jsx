@@ -1,105 +1,147 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Navbar from "../../components/layout/navbar";
-import InputField from "../../components/global/input-field";
 import Button from "../../components/global/button";
+import InputField from "../../components/global/input-field";
 
-const SignupPage = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "student" });
-  const [error, setError] = useState("");
+export default function SignupPage() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "student",
+  });
+  const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
-    setSuccess("");
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setSuccess("");
+
+    // Simple validation
+    const newErrors = {};
+    if (!form.name) newErrors.name = "Name required";
+    if (!form.email) newErrors.email = "Email required";
+    if (!form.password) newErrors.password = "Password required";
+    if (!form.role) newErrors.role = "Role required";
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Register user
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
 
+      const data = await res.json();
       if (!res.ok) {
-        setError(data.error);
+        setErrors({ general: data.error });
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(data.message);
+
+      // Wait a bit for DB consistency
+      await new Promise((r) => setTimeout(r, 500));
+
+      // Auto-login after signup
+      const loginRes = await signIn("credentials", {
+        redirect: false,
+        email: form.email,
+        password: form.password,
+      });
+
+      if (loginRes?.ok) {
+        // Fetch session to get user role
+        const sessionRes = await fetch("/api/auth/session");
+        const session = await sessionRes.json();
+        const role = session?.user?.role;
+
+        router.push(role === "admin" ? "/admin-dashboard" : "/student-dashboard");
       } else {
-        setSuccess("Registration successful! Redirecting...");
-        setTimeout(() => router.push("/signin"), 2000);
+        setErrors({
+          general: "Auto-login failed. Please login manually.",
+        });
       }
     } catch (err) {
-      setError("Something went wrong.");
+      console.error(err);
+      setErrors({ general: "Something went wrong" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-600 to-pink-500 flex flex-col text-white">
-      <Navbar />
+    <div className="min-h-screen flex justify-center items-center bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col gap-6"
+      >
+        <h2 className="text-3xl font-bold text-center text-gray-800">Signup</h2>
 
-      <section className="flex flex-1 justify-center items-center">
-        <div className="w-full max-w-md bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-lg text-white">
-          <h2 className="text-3xl font-bold text-center mb-6">Sign Up</h2>
+        <InputField
+          label="Name"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          error={errors.name}
+        />
+        <InputField
+          label="Email"
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={handleChange}
+          error={errors.email}
+        />
+        <InputField
+          label="Password"
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={handleChange}
+          error={errors.password}
+        />
 
-          {error && <p className="text-red-400 text-center mb-4">{error}</p>}
-          {success && <p className="text-green-400 text-center mb-4">{success}</p>}
+        <label className="text-gray-700 font-medium">Role</label>
+        <select
+          name="role"
+          value={form.role}
+          onChange={handleChange}
+          className="border rounded px-2 py-1"
+        >
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+        {errors.role && <p className="text-red-500">{errors.role}</p>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <InputField
-              label="Full Name"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
-            <InputField
-              label="Email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-            <InputField
-              label="Password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
+        {errors.general && (
+          <p className="text-red-500 text-center">{errors.general}</p>
+        )}
+        {success && (
+          <p className="text-green-500 text-center">{success}</p>
+        )}
 
-            <label className="block">
-              Role
-              <select
-                name="role"
-                value={form.role}
-                onChange={handleChange}
-                className="w-full border px-2 py-2 rounded mt-1 text-black"
-              >
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-              </select>
-            </label>
-
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Creating account..." : "Sign Up"}
-            </Button>
-          </form>
-        </div>
-      </section>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
+        </Button>
+      </form>
     </div>
   );
-};
-
-export default SignupPage;
+}

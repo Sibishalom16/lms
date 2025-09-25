@@ -3,9 +3,8 @@ import React from "react";
 import MainLayout from "../layout/main-layout";
 import Sidebar from "../layout/sidebar";
 import Navbar from "../layout/navbar";
-import Card from "../global/card";
 
-export default function DashboardPage() {
+export default function AdminDashboardPage() {
   return (
     <MainLayout
       sidebar={<Sidebar role="admin" />}
@@ -17,7 +16,7 @@ export default function DashboardPage() {
         <p className="text-lg mb-8 text-white">
           Welcome to admin dashboard! 🎉
         </p>
-
+        {/* Add cards, charts, or other components here */}
       </div>
     </MainLayout>
   );
