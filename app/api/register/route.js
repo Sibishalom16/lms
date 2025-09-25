@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-
-let users = []; // mock in-memory array
+import connectToDatabase from '../../../utils/mongodb.js';
+import User from '../../models/User.js';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
   try {
@@ -9,47 +10,99 @@ export async function POST(request) {
 
     // Validation
     if (!email || !password || !name || !role) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+      console.log(' Registration failed: Missing required fields');
+      return NextResponse.json(
+        { error: 'All fields are required' },
+        { status: 400 }
+      );
     }
 
     if (!['student', 'admin'].includes(role)) {
-      return NextResponse.json({ error: 'Invalid role selected' }, { status: 400 });
+      console.log(' Registration failed: Invalid role -', role);
+      return NextResponse.json(
+        { error: 'Invalid role selected' },
+        { status: 400 }
+      );
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+      console.log(' Registration failed: Invalid email format -', email);
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      );
     }
 
     if (password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 });
+      console.log(' Registration failed: Password too short');
+      return NextResponse.json(
+        { error: 'Password must be at least 6 characters long' },
+        { status: 400 }
+      );
     }
 
-    // Check duplicate
-    if (users.find(user => user.email === email)) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
-    }
-
-    const newUser = {
-      id: Date.now().toString(),
+    // Log registration attempt
+    console.log(' New user registration attempt:', {
       email,
-      password, // NOTE: Not hashed in mock
       name,
       role,
-      createdAt: new Date().toISOString()
-    };
+      timestamp: new Date().toISOString(),
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    });
 
-    users.push(newUser);
+    // Connect to MongoDB
+    console.log(' Connecting to MongoDB...');
+    const db = await connectToDatabase();
+    console.log(' Connected to MongoDB:', db.connection.name);
 
-    console.log("✅ User registered:", newUser);
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.log(' Registration failed: Email already exists -', email);
+      return NextResponse.json(
+        { error: 'User already exists' },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Create new user
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      name,
+      role,
+    });
+
+    console.log(' User registration successful:', {
+      id: newUser._id.toString(),
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
+      timestamp: new Date().toISOString()
+    });
 
     return NextResponse.json(
-      { message: "User registered successfully", user: { id: newUser.id, email, name, role } },
+      { 
+        message: 'User registered successfully',
+        user: {
+          id: newUser._id.toString(),
+          email: newUser.email,
+          name: newUser.name,
+          role: newUser.role
+        }
+      },
       { status: 201 }
     );
 
-  } catch (err) {
-    console.error("❌ Registration error:", err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error) {
+    console.error(' Registration error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
-}
+} 
