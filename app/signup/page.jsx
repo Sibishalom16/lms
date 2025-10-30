@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast, Toaster } from "react-hot-toast";
 import Button from "../../components/global/button";
 import InputField from "../../components/global/input-field";
 
@@ -13,35 +14,22 @@ export default function SignupPage() {
     password: "",
     role: "student",
   });
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors({});
-    setSuccess("");
 
-    // Simple validation
-    const newErrors = {};
-    if (!form.name) newErrors.name = "Name required";
-    if (!form.email) newErrors.email = "Email required";
-    if (!form.password) newErrors.password = "Password required";
-    if (!form.role) newErrors.role = "Role required";
-    if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
+    if (!form.name || !form.email || !form.password || !form.role) {
+      toast.error("Please fill in all fields");
       return;
     }
 
     setLoading(true);
-
     try {
-      // Register user
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,15 +38,14 @@ export default function SignupPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setErrors({ general: data.error });
+        toast.error(data.error || "Registration failed");
         setLoading(false);
         return;
       }
 
-      setSuccess(data.message);
+      toast.success("Account created successfully!");
 
-      // Wait a bit for DB consistency
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 800));
 
       // Auto-login after signup
       const loginRes = await signIn("credentials", {
@@ -68,20 +55,18 @@ export default function SignupPage() {
       });
 
       if (loginRes?.ok) {
-        // Fetch session to get user role
         const sessionRes = await fetch("/api/auth/session");
         const session = await sessionRes.json();
         const role = session?.user?.role;
+        toast.success("Redirecting to your dashboard...");
 
         router.push(role === "admin" ? "/admin-dashboard" : "/student-dashboard");
       } else {
-        setErrors({
-          general: "Auto-login failed. Please login manually.",
-        });
+        toast.error("Auto-login failed. Please login manually.");
       }
     } catch (err) {
       console.error(err);
-      setErrors({ general: "Something went wrong" });
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -89,6 +74,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400">
+      <Toaster position="top-center" reverseOrder={false} />
       <form
         onSubmit={handleSubmit}
         className="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col gap-6"
@@ -100,7 +86,6 @@ export default function SignupPage() {
           name="name"
           value={form.name}
           onChange={handleChange}
-          error={errors.name}
         />
         <InputField
           label="Email"
@@ -108,7 +93,6 @@ export default function SignupPage() {
           type="email"
           value={form.email}
           onChange={handleChange}
-          error={errors.email}
         />
         <InputField
           label="Password"
@@ -116,7 +100,6 @@ export default function SignupPage() {
           type="password"
           value={form.password}
           onChange={handleChange}
-          error={errors.password}
         />
 
         <label className="text-gray-700 font-medium">Role</label>
@@ -129,14 +112,6 @@ export default function SignupPage() {
           <option value="student">Student</option>
           <option value="admin">Admin</option>
         </select>
-        {errors.role && <p className="text-red-500">{errors.role}</p>}
-
-        {errors.general && (
-          <p className="text-red-500 text-center">{errors.general}</p>
-        )}
-        {success && (
-          <p className="text-green-500 text-center">{success}</p>
-        )}
 
         <Button type="submit" disabled={loading}>
           {loading ? "Registering..." : "Register"}
