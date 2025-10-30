@@ -11,7 +11,7 @@ export default function HomePage() {
         <ul className="flex gap-6">
           <li><a href="/" className="hover:text-yellow-300 transition">Home</a></li>
           <li><a href="/admin-dashboard" className="hover:text-yellow-300 transition">Dashboard</a></li>
-          <li><a href="/login" className="hover:text-yellow-300 transition">Login</a></li>
+          <li><a href="/signin" className="hover:text-yellow-300 transition">Login</a></li>
           <li><a href="/signup" className="hover:text-yellow-300 transition">Sign Up</a></li>
         </ul>
       </nav>
