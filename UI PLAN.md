@@ -28,3 +28,5 @@ src/
 - Navbar collapses into hamburger menu on mobile
 - DashboardLayout switches to vertical scroll on small screens
 - Buttons & Inputs scale with screen size
+
+

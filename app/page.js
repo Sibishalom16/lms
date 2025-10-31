@@ -1,7 +1,6 @@
+import Link from "next/link";
 import Button from "../components/global/button";
-
-import CourseCard from "../components/CourseCard"; 
-
+import CourseCard from "../components/CourseCard";
 
 export default function HomePage() {
   return (
@@ -9,10 +8,18 @@ export default function HomePage() {
       {/* Navbar */}
       <nav className="flex justify-end items-center p-4">
         <ul className="flex gap-6">
-          <li><a href="/" className="hover:text-yellow-300 transition">Home</a></li>
-          <li><a href="/admin-dashboard" className="hover:text-yellow-300 transition">Dashboard</a></li>
-          <li><a href="/signin" className="hover:text-yellow-300 transition">Login</a></li>
-          <li><a href="/signup" className="hover:text-yellow-300 transition">Sign Up</a></li>
+          <li>
+            <Link href="/" className="hover:text-yellow-300 transition">Home</Link>
+          </li>
+          <li>
+            <Link href="/admin-dashboard" className="hover:text-yellow-300 transition">Dashboard</Link>
+          </li>
+          <li>
+            <Link href="/signin" className="hover:text-yellow-300 transition">Login</Link>
+          </li>
+          <li>
+            <Link href="/signup" className="hover:text-yellow-300 transition">Sign Up</Link>
+          </li>
         </ul>
       </nav>
 
@@ -23,16 +30,26 @@ export default function HomePage() {
         <Button>Get Started</Button>
       </section>
 
-        {/* Courses */}
-        {/* Courses */}
-        <section className="bg-white py-16 px-6">
-          <h2 className="text-3xl font-bold text-center mb-10 text-gray-800">Popular Courses</h2>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-            <CourseCard title="React for Beginners" description="Learn the basics of React and build interactive UIs." />
-            <CourseCard title="Next.js Mastery" description="Dive into Next.js and explore server-side rendering and more." />
-            <CourseCard title="Tailwind CSS Crash Course" description="Style your apps quickly with Tailwind CSS utilities." />
-          </div>
-        </section>
-      </div>
-    );
-  }
+      {/* Courses */}
+      <section className="bg-white py-16 px-6">
+        <h2 className="text-3xl font-bold text-center mb-10 text-gray-800">
+          Popular Courses
+        </h2>
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+          <CourseCard
+            title="React for Beginners"
+            description="Learn the basics of React and build interactive UIs."
+          />
+          <CourseCard
+            title="Next.js Mastery"
+            description="Dive into Next.js and explore server-side rendering and more."
+          />
+          <CourseCard
+            title="Tailwind CSS Crash Course"
+            description="Style your apps quickly with Tailwind CSS utilities."
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
